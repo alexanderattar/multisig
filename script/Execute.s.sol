@@ -9,24 +9,29 @@ import {Multisig} from "../src/Multisig.sol";
 /// @notice Script to execute a transaction with collected signatures
 contract Execute is Script {
     function run() external {
-        /* --- mandatory env vars ----------------------------------- */
+        // Get deployer private key
         uint256 deployerPk = vm.envUint("DEPLOYER_PK");
+        // Get multisig address
         address payable msigAddr = payable(vm.envAddress("MSIG"));
+        // Get multisig contract
         Multisig ms = Multisig(msigAddr);
 
+        // Get target, value, data, deadline
         address target = vm.envAddress("TARGET");
         uint256 value = vm.envUint("VALUE");
         bytes memory data = vm.envBytes("DATA");
         uint256 deadline = vm.envUint("DEADLINE");
 
-        /* --- signatures (exactly two) ----------------------------- */
+        // Get signatures (exactly two)
         bytes memory sigA = vm.envBytes("SIG_A");
         bytes memory sigB = vm.envBytes("SIG_B");
+        // Require two 65-byte sigs
         require(sigA.length == 65 && sigB.length == 65, "Need two 65-byte sigs");
 
-        /* --- sort them by signer address -------------------------- */
+        // Get digest
         bytes32 digest = ms.hashExecute(target, value, data, ms.nonce(), deadline);
 
+        // Recover signers
         address signerA = ECDSA.recover(digest, sigA);
         address signerB = ECDSA.recover(digest, sigB);
 
@@ -39,7 +44,7 @@ contract Execute is Script {
             sigs[1] = sigA;
         }
 
-        /* --- broadcast -------------------------------------------- */
+        // Broadcast transaction
         vm.startBroadcast(deployerPk);
         ms.execute(target, value, data, deadline, sigs);
         vm.stopBroadcast();
