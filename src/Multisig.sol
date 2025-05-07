@@ -1,6 +1,4 @@
 // SPDX‑License‑Identifier: MIT
-pragma solidity ^0.8.24;
-
 import {ECDSA} from "@openzeppelin/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/utils/cryptography/EIP712.sol";
 
@@ -152,37 +150,49 @@ contract Multisig is EIP712, IMultisig {
         if (_s.length == 0 || _t == 0 || _t > _s.length) revert InvalidThreshold();
 
         // clear old set
-        for (uint256 i; i < signers.length; ++i) isSigner[signers[i]] = false;
+        uint256 len = signers.length;
+        for (uint256 i; i < len; ) {
+            isSigner[signers[i]] = false;
+            unchecked {
+                ++i;
+            }
+        }
         delete signers;
 
         // load new
-        for (uint256 i; i < _s.length; ++i) {
+        for (uint256 i; i < _s.length; ) {
             address a = _s[i];
             if (a == address(0) || isSigner[a]) revert DuplicateSigner();
+
             isSigner[a] = true;
             signers.push(a);
+
+            unchecked {
+                ++i;
+            }
         }
         threshold = uint128(_t);
     }
 
     /// @dev Verifies signatures against a digest
     /// @param digest The hash to verify signatures against
-    /// @param sigs Array of signatures to verify
+    /// @param sigs   Array of signatures to verify
     /// @dev Enforces signatures are from valid signers and in ascending order by signer address
     function _verifySignatures(bytes32 digest, bytes[] calldata sigs) private view {
-        uint256 count;
-        address prev;
+        if (sigs.length < threshold) revert NotEnoughSigners();
 
-        for (uint256 i; i < sigs.length; ++i) {
+        address prev;
+        for (uint256 i; i < sigs.length; ) {
             address signer = digest.recover(sigs[i]);
+
             if (signer <= prev) revert BadSignatureOrder();
             if (!isSigner[signer]) revert UnknownSigner();
+
             prev = signer;
             unchecked {
-                ++count;
+                ++i;
             }
         }
-        if (count < threshold) revert NotEnoughSigners();
     }
 
     /// @notice Allows the contract to receive ETH
