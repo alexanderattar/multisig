@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+pragma solidity 0.8.30;
 
 /// @title MockStorage
 /// @notice Simple contract with a storage variable for testing arbitrary calls

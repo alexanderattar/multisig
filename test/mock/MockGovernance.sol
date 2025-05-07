@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+pragma solidity 0.8.30;
 
 /// @title MockGovernance
 /// @notice Simple governance contract for testing voting

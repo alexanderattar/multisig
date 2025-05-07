@@ -1,4 +1,6 @@
 // SPDX‑License‑Identifier: MIT
+pragma solidity 0.8.30;
+
 import {ECDSA} from "@openzeppelin/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/utils/cryptography/EIP712.sol";
 

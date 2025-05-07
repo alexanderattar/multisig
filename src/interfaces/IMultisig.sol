@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity 0.8.30;
 
 /// @title IMultisig
 /// @notice Interface for the Multisig contract, defining the core functionality
